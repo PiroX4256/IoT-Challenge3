@@ -25,8 +25,6 @@ implementation {
 	
 	event void Boot.booted() {
 		call AMControl.start();
-		printf("PAPOPEPO");
-		dbg("PAPOPEPO");
 	}
 	
 	event void AMControl.startDone(error_t err) {
@@ -45,6 +43,8 @@ implementation {
 				default:
 					timer_period = 10000;
 			}
+			printf("STARTUP\n");
+			printfflush();
 			call MilliTimer.startPeriodic(timer_period);
 		}
 		else {
@@ -59,7 +59,8 @@ implementation {
 	
 	event void MilliTimer.fired() {
 		counter++;
-		dbg("Challenge3", "Timer fired, counter is %hu\n", counter);
+		printf("Challenge3 Timer fired, counter is %u\n", counter);
+		printfflush();
 		if(locked) {
 			return;
 		}		
