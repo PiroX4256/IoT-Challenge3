@@ -63,8 +63,8 @@ implementation {
 	
 	event void MilliTimer.fired() {
 		#ifdef LOGGING
-		printf("Challenge3 Timer fired, counter is %u\n", counter);
-		printfflush();
+		/*printf("Challenge3 Timer fired, counter is %u\n", counter);
+		printfflush();*/
 		#endif
 		if(locked) {
 			return;
@@ -91,14 +91,25 @@ implementation {
 		counter++;
 		
 		#ifdef LOGGING
-			printf("Counter: %u\n", counter);
-			printfflush();
+			/*printf("Counter: %u\n", counter);
+			printfflush();*/
 		#endif
 		
 		if(message_received->counter%10==0) {
 			call Leds.led0Off();
 			call Leds.led1Off();
 			call Leds.led2Off();
+			#ifdef LOGGING
+			printf("Flushing: %u\n", TOS_NODE_ID);
+			printfflush();
+			led1=FALSE;
+			led2=FALSE;
+			led3=FALSE;
+			if(TOS_NODE_ID == 2) {
+				printf("Led Status: %u%u%u\n", led1, led2, led3);
+				printfflush();
+			}
+			#endif
 			return bufPtr;
 		}
 		
