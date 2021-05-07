@@ -19,8 +19,10 @@ module Challenge3C
 
 implementation {
 	message_t packet;
-	
 	bool locked;
+	#ifdef LOGGING
+	bool led1 = FALSE, led2 = FALSE, led3 = FALSE;
+	#endif
 	uint16_t counter = 0;
 	
 	event void Boot.booted() {
@@ -36,6 +38,10 @@ implementation {
 					break;
 				case 2:
 					timer_period = FREQ2;
+					#ifdef LOGGING
+					printf("Led Status: %u%u%u\n", led1, led2, led3);
+					printfflush();
+					#endif
 					break;
 				case 3:
 					timer_period = FREQ3;
@@ -43,8 +49,6 @@ implementation {
 				default:
 					timer_period = 10000;
 			}
-			printf("STARTUP\n");
-			printfflush();
 			call MilliTimer.startPeriodic(timer_period);
 		}
 		else {
@@ -59,8 +63,10 @@ implementation {
 	
 	event void MilliTimer.fired() {
 		counter++;
+		#ifdef LOGGING
 		printf("Challenge3 Timer fired, counter is %u\n", counter);
 		printfflush();
+		#endif
 		if(locked) {
 			return;
 		}		
@@ -90,6 +96,7 @@ implementation {
 			call Leds.led2Off();
 			return bufPtr;
 		}
+		
 		switch(message_received->sender_id) {
 			case 1:
 				call Leds.led0Toggle();
@@ -101,8 +108,35 @@ implementation {
 				call Leds.led2Toggle();
 				break;
 			default:
-				dbg("KEK\n");
+				dbg("Nothing\n");
 		}
+		
+		#ifdef LOGGING
+		switch(message_received->sender_id) {
+				case 1:
+				if(TOS_NODE_ID == 2) {
+					led1 = !led1;
+				}
+				break;
+			case 2:
+				if(TOS_NODE_ID == 2) {
+					led2 = !led2;
+				}
+				break;
+			case 3:
+				if(TOS_NODE_ID == 2) {
+					led3 = !led3;
+				}
+				break;
+			default:
+				dbg("Nothing\n");
+		}
+		
+		if(TOS_NODE_ID==2) {
+			printf("Led Status: %u%u%u\n", led1, led2, led3);
+			printfflush();
+		}
+		#endif
 		return bufPtr;
 	}
 	
