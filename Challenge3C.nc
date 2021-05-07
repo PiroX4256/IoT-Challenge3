@@ -47,6 +47,7 @@ implementation {
 					timer_period = FREQ3;
 					break;
 				default:
+					//every mote which id is not between 1 and 3
 					timer_period = 10000;
 			}
 			call MilliTimer.startPeriodic(timer_period);
@@ -58,11 +59,9 @@ implementation {
 	
 	event void AMControl.stopDone(error_t err) {
 		//do nothing
-		dbg("Ho finito\n");
 	}
 	
 	event void MilliTimer.fired() {
-		counter++;
 		#ifdef LOGGING
 		printf("Challenge3 Timer fired, counter is %u\n", counter);
 		printfflush();
@@ -79,7 +78,6 @@ implementation {
 			message->sender_id = TOS_NODE_ID;
 			
 			if(call AMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(challenge3_msg_t)) == SUCCESS) {
-				dbg("Challenge3", "Packet sent from %hu with counter %hu\n", TOS_NODE_ID, counter);
 				locked = TRUE;
 			}
 		}
@@ -87,8 +85,15 @@ implementation {
 	
 	event message_t* Receive.receive(message_t* bufPtr, void* payload, uint8_t len) {
 		challenge3_msg_t* message_received = (challenge3_msg_t*)payload;
-		dbg("Challenge 3", "Packet of length %hhu received from %hu.\n", len, message_received->sender_id);
+		
 		if(len != sizeof(challenge3_msg_t)) return bufPtr;
+		
+		counter++;
+		
+		#ifdef LOGGING
+			printf("Counter: %u\n", counter);
+			printfflush();
+		#endif
 		
 		if(message_received->counter%10==0) {
 			call Leds.led0Off();
@@ -108,7 +113,10 @@ implementation {
 				call Leds.led2Toggle();
 				break;
 			default:
-				dbg("Nothing\n");
+				#ifdef LOGGING
+				printf("Nothing\n");
+				printfflush();
+				#endif
 		}
 		
 		#ifdef LOGGING
@@ -129,7 +137,10 @@ implementation {
 				}
 				break;
 			default:
-				dbg("Nothing\n");
+				#ifdef LOGGING
+				printf("Nothing\n");
+				printfflush();
+				#endif
 		}
 		
 		if(TOS_NODE_ID==2) {
@@ -147,3 +158,4 @@ implementation {
 	}
 	
 }
+
